@@ -1,7 +1,7 @@
 # main.py
 
 from typing import List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path
 from app.models.users import UserModel
 from app.schemas.users import UserCreate, UserCreateResponse, UserResponse
 
@@ -36,6 +36,22 @@ def get_all_users():
     if not users:
         raise HTTPException(status_code=404, detail="No users found")
     return users
+
+
+# 3. 유저 상세 조회 API
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user_by_id(
+    user_id: int = Path(..., gt=0, description="User ID must be positive")
+):
+    """
+    경로 매개변수로 전달된 user_id 사용해
+    해당 ID의 유저 조회.
+    없으면 404 에러 반환.
+    """
+    user = UserModel.get(id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 
 if __name__ == '__main__':
