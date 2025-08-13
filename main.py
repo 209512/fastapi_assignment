@@ -3,7 +3,7 @@
 from typing import List
 from fastapi import FastAPI, HTTPException, Path
 from app.models.users import UserModel
-from app.schemas.users import UserCreate, UserCreateResponse, UserResponse
+from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, UserUpdate
 
 app = FastAPI()
 
@@ -51,6 +51,26 @@ def get_user_by_id(
     user = UserModel.get(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+# 4. 유저 일부 수정 API
+@app.patch("/users/{user_id}", response_model=UserResponse)
+def update_user(
+    user_id: int = Path(..., gt=0),
+    user_update: UserUpdate = ...
+):
+    """
+    user_id로 유저 찾고,
+    요청 바디(UserUpdate)의 값으로 username, age 부분 수정.
+    존재하지 않으면 404 반환.
+    """
+    user = UserModel.get(id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # None이 아닌 값만 업데이트
+    user.update(username=user_update.username, age=user_update.age)
     return user
 
 

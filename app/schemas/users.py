@@ -2,6 +2,7 @@
 
 from enum import Enum
 from pydantic import BaseModel, Field
+from typing import Optional
 
 # gender field: enum
 class GenderEnum(str, Enum):
@@ -24,3 +25,8 @@ class UserResponse(BaseModel):
     username: str
     age: int
     gender: GenderEnum
+
+# Request Body에서 username, age 둘 중 일부만 수정해도 가능
+class UserUpdate(BaseModel):
+    username: Optional[str] = Field(None, min_length=1, max_length=50)
+    age: Optional[int] = Field(None, gt=0, le=120)
