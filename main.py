@@ -1,9 +1,9 @@
 # main.py
 
-from typing import Annotated
-from fastapi import FastAPI
+from typing import List
+from fastapi import FastAPI, HTTPException
 from app.models.users import UserModel
-from app.schemas.users import UserCreate, UserCreateResponse
+from app.schemas.users import UserCreate, UserCreateResponse, UserResponse
 
 app = FastAPI()
 
@@ -23,6 +23,20 @@ def create_user(user: UserCreate):
         gender=user.gender,
     )
     return {'id': new_user.id}
+
+
+# 2. 모든 유저 조회 API
+@app.get("/users", response_model=List[UserResponse])
+def get_all_users():
+    """
+    모든 유저 데이터를 리스트로 반환.
+    유저 없으면 404 에러 반환.
+    """
+    users = UserModel.all()
+    if not users:
+        raise HTTPException(status_code=404, detail="No users found")
+    return users
+
 
 if __name__ == '__main__':
     import uvicorn

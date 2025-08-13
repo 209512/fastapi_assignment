@@ -17,3 +17,10 @@ class UserCreate(BaseModel):
 # 유저 생성 응답 모델
 class UserCreateResponse(BaseModel):
     id: int
+
+# 모든 유저 정보 반환 모델
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    age: int
+    gender: GenderEnum
