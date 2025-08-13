@@ -74,6 +74,19 @@ def update_user(
     return user
 
 
+# 5. 유저 삭제 API
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int = Path(..., gt=0)):
+    """
+    user_id로 유저 찾아 삭제.
+    없으면 404 반환, 성공 시 detail 메시지 반환.
+    """
+    user = UserModel.get(id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.delete()
+    return {"detail": f"User: {user_id}, Successfully Deleted."}
+
 if __name__ == '__main__':
     import uvicorn
 
