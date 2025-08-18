@@ -16,3 +16,8 @@ class MovieResponse(BaseModel):
 class MovieSearchQuery(BaseModel):
     title: str | None = Field(None, min_length=1)
     genre: str | None = Field(None, min_length=1)
+
+class MovieUpdate(BaseModel):
+    title: str | None = Field(None, min_length=1)
+    playtime: int | None = Field(None, gt=0)
+    genre: list[str] | None = Field(None, min_items=1)

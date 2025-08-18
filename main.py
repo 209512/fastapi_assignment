@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Path, Query, status
 from app.models.users import UserModel
 from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, UserUpdate, UserSearchQuery, GenderEnum
 from app.models.movies import MovieModel
-from app.schemas.movies import MovieCreate, MovieResponse
+from app.schemas.movies import MovieCreate, MovieUpdate, MovieResponse
 
 app = FastAPI()
 
@@ -109,6 +109,21 @@ def get_movie(movie_id: Annotated[int, Path(..., gt=0)]):
     movie = MovieModel.get(id=movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found")
+    return MovieResponse(id=movie.id, title=movie.title, playtime=movie.playtime, genre=movie.genre)
+
+# 4. 특정 영화 정보 수정 API
+@app.patch("/movies/{movie_id}", response_model=MovieResponse)
+def update_movie(
+        movie_id: Annotated[int, Path(..., gt=0, description="Movie ID must be a positive integer")],
+        movie_update: MovieUpdate = ...,
+):
+    movie = MovieModel.get(id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    update_data = movie_update.model_dump(exclude_unset=True)
+    movie.update(**update_data)
+
     return MovieResponse(id=movie.id, title=movie.title, playtime=movie.playtime, genre=movie.genre)
 
 
