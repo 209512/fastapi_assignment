@@ -126,6 +126,15 @@ def update_movie(
 
     return MovieResponse(id=movie.id, title=movie.title, playtime=movie.playtime, genre=movie.genre)
 
+# 5. 특정 영화 정보 삭제 API
+@app.delete("/movies/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_movie(movie_id: Annotated[int, Path(..., gt=0)]):
+    movie = MovieModel.get(id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    movie.delete()
+    return
+
 
 if __name__ == '__main__':
     import uvicorn
