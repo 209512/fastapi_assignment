@@ -8,6 +8,7 @@ from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, User
 app = FastAPI()
 
 UserModel.create_dummy() # API 테스트를 위한 더미를 생성하는 메서드 입니다.
+MovieModel.create_dummy()
 
 # 1. 유저 생성 API
 @app.post("/user/create", response_model=UserCreateResponse)
