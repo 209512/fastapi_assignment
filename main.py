@@ -30,7 +30,7 @@ def get_all_users():
 
 @app.get("/users/{user_id}", response_model=UserResponse)
 def get_user_by_id(
-    user_id: int = Path(..., gt=0, description="User ID must be positive")
+    user_id: Annotated[int, Path(..., gt=0, description="User ID must be positive")]
 ):
     user = UserModel.get(id=user_id)
     if not user:
@@ -39,7 +39,7 @@ def get_user_by_id(
 
 @app.patch("/users/{user_id}", response_model=UserResponse)
 def update_user(
-    user_id: int = Path(..., gt=0),
+    user_id: Annotated[int, Path(..., gt=0)],
     user_update: UserUpdate = ...
 ):
     user = UserModel.get(id=user_id)
@@ -50,7 +50,9 @@ def update_user(
     return user
 
 @app.delete("/users/{user_id}")
-def delete_user(user_id: int = Path(..., gt=0)):
+def delete_user(
+        user_id: Annotated[int, Path(..., gt=0)]
+):
     user = UserModel.get(id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -59,8 +61,8 @@ def delete_user(user_id: int = Path(..., gt=0)):
 
 @app.get("/users/search", response_model=list[UserResponse])
 def search_users(
-    username: str | None = Query(None, min_length=1, max_length=50),
-    age: int | None = Query(None, gt=0),
+    username: Annotated[str | None, Query(min_length=1, max_length=50)] = None,
+    age: Annotated[int | None, Query(gt=0)] = None,
     gender: GenderEnum | None = None
 ):
     query_data = UserSearchQuery(username=username, age=age, gender=gender)
