@@ -103,6 +103,14 @@ def list_movies(
         movies = MovieModel.all()
     return [MovieResponse(id=m.id, title=m.title, playtime=m.playtime, genre=m.genre) for m in movies]
 
+# 3. 특정 영화 상세 조회 API
+@app.get("/movies/{movie_id}", response_model=MovieResponse)
+def get_movie(movie_id: Annotated[int, Path(..., gt=0)]):
+    movie = MovieModel.get(id=movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return MovieResponse(id=movie.id, title=movie.title, playtime=movie.playtime, genre=movie.genre)
+
 
 if __name__ == '__main__':
     import uvicorn
