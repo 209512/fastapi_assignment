@@ -1,9 +1,8 @@
 # main.py
 
-from typing import List, Optional # Annotated 사용시 한번 타입 선언으로 타입힌트, 추가정보 함께 명시 가능 /복잡한 타입 명시에 사용
 from fastapi import FastAPI, HTTPException, Path, Query, status
 from app.models.users import UserModel
-from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, UserUpdate, UserSearchQuery
+from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, UserUpdate, UserSearchQuery, GenderEnum
 from app.models.movies import MovieModel
 from app.schemas.movies import MovieCreate, MovieResponse
 
@@ -19,9 +18,9 @@ def create_user(user: UserCreate):
         age=user.age,
         gender=user.gender,
     )
-    return {'id': new_user.id}
+    return UserCreateResponse(id=new_user.id)
 
-@app.get("/users", response_model=List[UserResponse])
+@app.get("/users", response_model=list[UserResponse])
 def get_all_users():
     users = UserModel.all()
     if not users:
@@ -57,25 +56,21 @@ def delete_user(user_id: int = Path(..., gt=0)):
     user.delete()
     return {"detail": f"User: {user_id}, Successfully Deleted."}
 
-@app.get("/users/search", response_model=List[UserResponse])
+@app.get("/users/search", response_model=list[UserResponse])
 def search_users(
-    username: Optional[str] = Query(None, min_length=1, max_length=50),
-    age: Optional[int] = Query(None, gt=0),
-    gender: Optional[str] = Query(None)
+    username: str | None = Query(None, min_length=1, max_length=50),
+    age: int | None = Query(None, gt=0),
+    gender: GenderEnum | None = None
 ):
-    try:
-        query_data = UserSearchQuery(
-            username=username,
-            age=age,
-            gender=gender
-        )
-    except Exception as e:
-        raise HTTPException(status_code=422, detail=str(e))
+    query_data = UserSearchQuery(username=username, age=age, gender=gender)
 
     filters = {}
-    if query_data.username: filters["username"] = query_data.username
-    if query_data.age: filters["age"] = query_data.age
-    if query_data.gender: filters["gender"] = query_data.gender
+    if query_data.username:
+        filters["username"] = query_data.username
+    if query_data.age:
+        filters["age"] = query_data.age
+    if query_data.gender:
+        filters["gender"] = query_data.gender
 
     users = UserModel.filter(**filters)
     if not users:
