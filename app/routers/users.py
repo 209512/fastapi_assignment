@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Path, Query, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from datetime import datetime, timezone
-from app.utils.jwt import create_access_token
+from app.utils.jwt import create_access_token, get_current_user
 from app.models.users import UserModel
 from app.schemas.users import (
     UserCreate, UserCreateResponse, UserResponse,
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 def create_user(user: UserCreate):
     new_user = UserModel.create(
         username=user.username,
-        password="changeme",   # 일단 임시
+        password=user.password,
         age=user.age,
         gender=user.gender,
     )
@@ -42,3 +42,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user.last_login = datetime.now(timezone.utc)
     token = create_access_token(data={"user_id": user.id})
     return {"access_token": token, "token_type": "bearer"}
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: Annotated[UserModel, Depends(get_current_user)]):
+    return current_user
