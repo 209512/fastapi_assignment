@@ -1,10 +1,8 @@
 # app/models/users.py
 
 from __future__ import annotations
-
 import random
 from typing import Any
-
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,17 +27,20 @@ class UserModel:
     @staticmethod
     def get_hashed_password(password: str) -> str:
         """ 비밀번호 해시화 """
-        ...
+        return pwd_context.hash(password)
 
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """ 비밀번호 검증 """
-    ...
+        return pwd_context.verify(plain_password, hashed_password)
 
     @classmethod
     def authenticate(cls, username: str, password: str) -> UserModel | None:
         """ 사용자 인증 """
-    ...
+        user = cls.get(username=username)
+        if user and cls.verify_password(password, user.password):
+            return user
+        return None
 
     @classmethod
     def create(cls, username: str, password: str, age: int, gender: str) -> UserModel:
