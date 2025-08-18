@@ -1,3 +1,5 @@
+# app/schemas/movies.py
+
 from pydantic import BaseModel, Field
 
 class MovieCreate(BaseModel):
@@ -10,3 +12,7 @@ class MovieResponse(BaseModel):
     title: str
     playtime: int
     genre: list[str]
+
+class MovieSearchQuery(BaseModel):
+    title: str | None = Field(None, min_length=1)
+    genre: str | None = Field(None, min_length=1)

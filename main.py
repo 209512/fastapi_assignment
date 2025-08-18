@@ -1,5 +1,6 @@
 # main.py
 
+from typing import Annotated
 from fastapi import FastAPI, HTTPException, Path, Query, status
 from app.models.users import UserModel
 from app.schemas.users import UserCreate, UserCreateResponse, UserResponse, UserUpdate, UserSearchQuery, GenderEnum
@@ -82,6 +83,24 @@ def search_users(
 def create_movie(movie: MovieCreate):
     instance = MovieModel.create(movie.title, movie.playtime, movie.genre)
     return MovieResponse(id=instance.id, title=instance.title, playtime=instance.playtime, genre=instance.genre)
+
+# 2. 전체 영화 검색 및 리스트 조회 API
+@app.get("/movies", response_model=list[MovieResponse])
+def list_movies(
+    title: Annotated[str | None, Query(min_length=1)] = None,
+    genre: Annotated[str | None, Query(min_length=1)] = None,
+):
+    if title or genre:
+        movies = MovieModel.filter(
+            title=title if title else None,
+            genre=genre if genre else None,
+        )
+        if genre:
+            movies = [m for m in movies if genre in m.genre]
+    else:
+        movies = MovieModel.all()
+    return [MovieResponse(id=m.id, title=m.title, playtime=m.playtime, genre=m.genre) for m in movies]
+
 
 if __name__ == '__main__':
     import uvicorn
