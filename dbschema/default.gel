@@ -1,0 +1,32 @@
+module default {
+
+    scalar type GenderEnum extending enum<"male", "female">;
+    scalar type GenreEnum extending enum<"SF", "Romantic", "Action", "Comedy", "Horror", "Adventure">;
+
+    abstract type BaseModel {
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+    }
+
+    type User extending BaseModel {
+        required property username -> str {
+            constraint exclusive;
+            constraint max_len_value(50);
+        }
+        required property hashed_password -> str;
+        required property age -> int16;
+        required property gender -> GenderEnum;
+        optional property last_login -> datetime;
+    }
+
+    type Movie extending BaseModel {
+        required property title -> str {
+            constraint max_len_value(255);
+        }
+        required property plot -> str;
+        required property playtime -> int16;
+        required property genre -> GenreEnum;
+        required property cast -> json;
+    }
+}
