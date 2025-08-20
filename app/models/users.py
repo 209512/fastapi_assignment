@@ -6,11 +6,9 @@ from datetime import datetime, timezone
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# 비밀번호 해싱 함수
 async def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-# 유저 생성 함수 (insert User)
 async def create_user(username: str, password: str, age: int, gender: str):
     client = await get_client()
     hashed_password = await hash_password(password)
@@ -30,7 +28,6 @@ async def create_user(username: str, password: str, age: int, gender: str):
         gender=gender,
     )
 
-# 유저 인증 함수 (select후 비밀번호 검증)
 async def authenticate_user(username: str, password: str):
     client = await get_client()
     query = """
@@ -52,7 +49,6 @@ async def authenticate_user(username: str, password: str):
         return None
     return user
 
-# 모든 유저 조회 함수
 async def get_all_users():
     client = await get_client()
     query = """
@@ -67,7 +63,6 @@ async def get_all_users():
     users = await client.query(query)
     return users
 
-# 로그인 시간 업데이트 함수
 async def update_last_login(user_id: int):
     client = await get_client()
     now = datetime.now(timezone.utc)
@@ -79,3 +74,15 @@ async def update_last_login(user_id: int):
         }
     """
     await client.query(query, user_id=user_id, now=now)
+
+async def update_user_profile_image_url(user_id: int, url: str | None):
+    client = await get_client()
+    query = """
+        update User
+        filter .id = <int64>$user_id
+        set {
+            profile_image_url := <str?>$url
+        }
+    """
+    updated = await client.query_single(query, user_id=user_id, url=url)
+    return updated

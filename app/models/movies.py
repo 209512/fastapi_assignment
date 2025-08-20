@@ -89,3 +89,15 @@ async def delete_movie_by_id(movie_id: int):
     result = await client.query(query, movie_id=movie_id)
     # GelDB delete 쿼리는 리스트 반환, 삭제된 항목이 있으면 True
     return bool(result)
+
+async def update_movie_poster_image_url(movie_id: int, url: str | None):
+    client = await get_client()
+    query = """
+        update Movie
+        filter .id = <int64>$movie_id
+        set {
+            poster_image_url := <str?>$url
+        }
+    """
+    updated = await client.query_single(query, movie_id=movie_id, url=url)
+    return updated
