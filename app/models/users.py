@@ -2,6 +2,7 @@
 
 from app.configs.database import get_client
 from passlib.context import CryptContext
+from datetime import datetime, timezone
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -50,3 +51,31 @@ async def authenticate_user(username: str, password: str):
     if not verified:
         return None
     return user
+
+# 모든 유저 조회 함수
+async def get_all_users():
+    client = await get_client()
+    query = """
+        select User {
+            id,
+            username,
+            age,
+            gender
+        }
+        order by .created_at desc
+    """
+    users = await client.query(query)
+    return users
+
+# 로그인 시간 업데이트 함수
+async def update_last_login(user_id: int):
+    client = await get_client()
+    now = datetime.now(timezone.utc)
+    query = """
+        update User
+        filter .id = <int64>$user_id
+        set {
+            last_login := <datetime>$now
+        }
+    """
+    await client.query(query, user_id=user_id, now=now)
