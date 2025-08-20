@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    BASE_DIR: Path = Path(__file__).parent.parent.parent.resolve()
+    MEDIA_DIR: Path = BASE_DIR / "media"
+
     class Config:
         env_file = ".env"
 
