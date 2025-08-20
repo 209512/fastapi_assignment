@@ -21,8 +21,8 @@ async def add_movie(movie: MovieCreate):
 # 영화 조회 API (필터링 가능)
 @router.get("", response_model=list[MovieResponse])
 async def list_movies_endpoint(
-    title: Annotated[str | None, Query(None, min_length=1)] = None,
-    genre: Annotated[str | None, Query(None, min_length=1)] = None
+    title: Annotated[str | None, Query(min_length=1)] = None,
+    genre: Annotated[str | None, Query(min_length=1)] = None
 ):
     movies = await list_movies(title=title, genre=genre)
     return movies
