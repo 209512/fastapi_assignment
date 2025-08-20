@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     username: str
     age: int
     gender: GenderEnum
+    profile_image_url: str | None = None
 
 class UserUpdate(BaseModel):
     username: str | None = Field(None, min_length=1, max_length=50)
