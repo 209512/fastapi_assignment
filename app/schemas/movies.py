@@ -12,6 +12,7 @@ class MovieResponse(BaseModel):
     title: str
     playtime: int
     genre: list[str]
+    poster_image_url: str | None = None
 
 class MovieSearchQuery(BaseModel):
     title: str | None = Field(None, min_length=1)
