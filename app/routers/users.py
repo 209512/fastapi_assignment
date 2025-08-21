@@ -41,7 +41,7 @@ async def get_me(current_user: Annotated[dict, Depends(get_current_user)]):
 @router.post("/me/profile_image", response_model=UserResponse)
 async def upload_profile_image(
     file: UploadFile = File(...),
-    current_user: Annotated[dict, Depends(get_current_user)] = Depends()
+    current_user=Depends(get_current_user)
 ):
     validate_image_extension(file)
 

@@ -1,6 +1,7 @@
 # app/configs/base.py
 
 from pydantic_settings import BaseSettings
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,5 +18,4 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-# settings 객체를 import시점에 생성해 사용
 settings = Settings()
