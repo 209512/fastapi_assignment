@@ -11,6 +11,10 @@ async def get_reviewlike(user_id: int, review_id: int):
     return await client.query_single(query, user_id=user_id, review_id=review_id)
 
 async def create_reviewlike(user_id: int, review_id: int, is_liked: bool = True):
+    existing = await get_reviewlike(user_id, review_id)
+    if existing:
+        # 중복 생성 방지 - 필요하면 리턴 None 혹은 업데이트 로직 수행
+        return None
     client = await get_client()
     query = """
         insert ReviewLike {

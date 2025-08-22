@@ -31,29 +31,31 @@ module default {
     }
 
     type Review {
-    required property title -> str {
-        constraint max_len_value(50);
-    }
-    required property content -> str {
-        constraint max_len_value(255);
-    }
-    property review_image_url -> str;  # nullable
-    required property created_at -> datetime {
-        default := datetime_current();
-    }
-    required link user -> User;
-    required link movie -> Movie;
+        required property title -> str {
+            constraint max_len_value(50);
+        }
+        required property content -> str {
+            constraint max_len_value(255);
+        }
+        property review_image_url -> str;  # nullable
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link user -> User;
+        required link movie -> Movie;
+        constraint exclusive on (.user, .movie);
     }
 
     type ReviewLike {
-    required property is_liked -> bool {
-        default := true;
-    }
-    required property created_at -> datetime {
-        default := datetime_current();
-    }
-    required link user -> User;
-    required link review -> Review;
+        required property is_liked -> bool {
+            default := true;
+        }
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link user -> User;
+        required link review -> Review;
+        constraint exclusive on (.user, .review);
     }
 
 }
