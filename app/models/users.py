@@ -7,24 +7,14 @@ import asyncio
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# --- 수정된 코드 ---
-
-# 동기 함수로 정의
-# hash()는 CPU 집약적인 동기 작업이므로, async def가 아닌 def로 정의하는 것이 올바름
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-# 동기 함수로 정의
 def verify_password(password: str, hashed_password: str) -> bool:
-    """주어진 비밀번호와 해싱된 비밀번호를 비교"""
     return pwd_context.verify(password, hashed_password)
-
-# -----------------
 
 async def create_user(username: str, password: str, age: int, gender: str):
     client = await get_client()
-    # async def 안에서 동기 함수를 호출할 때 await를 붙이지 x
-    # FastAPI는 이 동기 함수를 스레드 풀에서 실행해 이벤트 루프를 블로킹하지 않도록 자동 처리
     hashed_password = hash_password(password)
     query = """
         insert User {
@@ -59,8 +49,6 @@ async def authenticate_user(username: str, password: str):
     if not user:
         return None
 
-    # 비동기 함수 안에서 동기 함수 호출 시 await를 붙이지 않으며,
-    # FastAPI가 내부적으로 스레드 풀을 이용해 안전하게 처리
     verified = verify_password(password, user.hashed_password)
     if not verified:
         return None
@@ -103,3 +91,63 @@ async def update_user_profile_image_url(user_id: int, url: str | None):
     """
     updated = await client.query_single(query, user_id=user_id, url=url)
     return updated
+
+async def get_follow(follower_id: int, following_id: int):
+    client = await get_client()
+    query = """
+        select Follow
+        filter .follower.id = <int64>$follower_id and .following.id = <int64>$following_id
+    """
+    return await client.query_single(query, follower_id=follower_id, following_id=following_id)
+
+async def create_follow(follower_id: int, following_id: int, is_following: bool = True):
+    client = await get_client()
+    query = """
+        insert Follow {
+            follower := (select User filter .id = <int64>$follower_id),
+            following := (select User filter .id = <int64>$following_id),
+            is_following := <bool>$is_following,
+            created_at := <datetime>$now
+        }
+    """
+    now = datetime.now(timezone.utc)
+    return await client.query_single(query, follower_id=follower_id, following_id=following_id, is_following=is_following, now=now)
+
+async def update_follow_is_following(follow_id: int, is_following: bool):
+    client = await get_client()
+    query = """
+        update Follow
+        filter .id = <int64>$follow_id
+        set {
+            is_following := <bool>$is_following
+        }
+    """
+    return await client.query_single(query, follow_id=follow_id, is_following=is_following)
+
+async def get_followings(user_id: int):
+    client = await get_client()
+    query = """
+        select Follow {
+            following: {
+                id,
+                username,
+                profile_image_url
+            }
+        }
+        filter .follower.id = <int64>$user_id and .is_following = true
+    """
+    return await client.query(query, user_id=user_id)
+
+async def get_followers(user_id: int):
+    client = await get_client()
+    query = """
+        select Follow {
+            follower: {
+                id,
+                username,
+                profile_image_url
+            }
+        }
+        filter .following.id = <int64>$user_id and .is_following = true
+    """
+    return await client.query(query, user_id=user_id)
