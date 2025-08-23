@@ -30,3 +30,18 @@ class UserSearchQuery(BaseModel):
     username: str | None = Field(None, min_length=1, max_length=50)
     age: int | None = Field(None, gt=0)
     gender: GenderEnum | None = None
+
+class FollowResponse(BaseModel):
+    follower_id: int
+    following_id: int
+    is_following: bool
+
+class FollowingUserResponse(BaseModel):
+    following_id: int
+    username: str
+    profile_image_url: str | None = None
+
+class FollowerUserResponse(BaseModel):
+    follower_id: int
+    username: str
+    profile_image_url: str | None = None

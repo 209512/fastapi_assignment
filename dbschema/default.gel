@@ -2,6 +2,7 @@ module default {
 
     scalar type GenderEnum extending enum<"male", "female">;
     scalar type GenreEnum extending enum<"SF", "Romantic", "Action", "Comedy", "Horror", "Adventure">;
+    scalar type ReactionTypeEnum extending enum<"like", "dislike">;
 
     abstract type BaseModel {
         required property created_at -> datetime {
@@ -31,29 +32,55 @@ module default {
     }
 
     type Review {
-    required property title -> str {
-        constraint max_len_value(50);
-    }
-    required property content -> str {
-        constraint max_len_value(255);
-    }
-    property review_image_url -> str;  # nullable
-    required property created_at -> datetime {
-        default := datetime_current();
-    }
-    required link user -> User;
-    required link movie -> Movie;
+        required property title -> str {
+            constraint max_len_value(50);
+        }
+        required property content -> str {
+            constraint max_len_value(255);
+        }
+        property review_image_url -> str;  # nullable
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link user -> User;
+        required link movie -> Movie;
+        constraint exclusive on ((.user, .movie));
     }
 
     type ReviewLike {
-    required property is_liked -> bool {
-        default := true;
+        required property is_liked -> bool {
+            default := true;
+        }
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link user -> User;
+        required link review -> Review;
+        constraint exclusive on ((.user, .review));
     }
-    required property created_at -> datetime {
-        default := datetime_current();
+
+    type Follow {
+        required property is_following -> bool {
+            default := true;
+        }
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link follower -> User;
+        required link following -> User;
+        constraint exclusive on ((.follower, .following));
     }
-    required link user -> User;
-    required link review -> Review;
+
+    type MovieLike {
+        required property type -> ReactionTypeEnum {
+            default := 'dislike';
+        }
+        required property created_at -> datetime {
+            default := datetime_current();
+        }
+        required link user -> User;
+        required link movie -> Movie;
+        constraint exclusive on ((.user, .movie));
     }
 
 }
